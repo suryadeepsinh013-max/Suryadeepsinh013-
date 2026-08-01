@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shahi Darbar | Restaurant Management System</title>
+    <!-- Google Fonts: Playfair Display (Serif headings), Outfit (Modern UI sans-serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container hidden">
+        
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <span class="gold-star"><i class="fa-solid fa-star"></i></span>
+                    <h1 class="brand-title">Shahi Darbar</h1>
+                </div>
+                <p class="brand-subtitle">AUTHENTIC INDIAN</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#pos" class="nav-item" data-tab="pos">
+                    <i class="fa-solid fa-cash-register"></i>
+                    <span>Point of Sale</span>
+                </a>
+                <a href="#tables" class="nav-item" data-tab="tables">
+                    <i class="fa-solid fa-chair"></i>
+                    <span>Table Planner</span>
+                </a>
+                <a href="#menu" class="nav-item" data-tab="menu">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>Menu Manager</span>
+                </a>
+                <a href="#staff" class="nav-item" data-tab="staff">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span>Staff Manager</span>
+                </a>
+                <a href="#kitchen" class="nav-item" data-tab="kitchen">
+                    <i class="fa-solid fa-fire-burner"></i>
+                    <span>Kitchen View</span>
+                    <span class="badge badge-danger" id="kitchen-count-badge">0</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
+                    <div class="user-info">
+                        <span class="username" id="logged-username">admin</span>
+                        <span class="role" id="logged-role">General Manager</span>
+                    </div>
+                    <button class="logout-btn" id="btn-logout" title="Log Out" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; font-size: 1.1rem; transition: var(--transition-smooth); margin-left: auto;">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN CONTENT ================= -->
+        <main class="main-content">
+            
+            <!-- TOP HEADER -->
+            <header class="topbar">
+                <div class="header-left">
+                    <h2 class="view-title" id="active-tab-title">Dashboard Hub</h2>
+                    <span class="current-date" id="live-clock"><i class="fa-regular fa-clock"></i> May 28, 2026 13:42:00</span>
+                </div>
+                <div class="header-right">
+                    <div class="quick-status">
+                        <div class="status-item">
+                            <span class="status-dot online"></span>
+                            <span class="status-label">POS Server: Live</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-gold btn-sm" id="btn-quick-reservation">
+                        <i class="fa-solid fa-plus"></i> New Reservation
+                    </button>
+                </div>
+            </header>
+
+            <!-- VIEW PANEL CONTAINERS -->
+            <div class="views-wrapper">
+                
+                <!-- 1. DASHBOARD VIEW -->
+                <section id="view-dashboard" class="view-panel active">
+                    <!-- Top Summary Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon rev"><i class="fa-solid fa-wallet"></i></div>
+                            <div class="stat-data">
+                                <span class="stat-lbl">Daily Revenue</span>
+                                <h3 class="stat-val" id="stat-revenue">₹0.00</h3>
+                            </div>
+                            <div class="stat-trend up"><i class="fa-solid fa-caret-up"></i> +14.2%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon occ"><i class="fa-solid fa-users"></i></div>
+                            <div class="stat-data">
+                                <span class="stat-lbl">Occupancy Rate</span>
+                                <h3 class="stat-val" id="stat-occupancy">0%</h3>
+                            </div>
+                            <div class="stat-trend neutral"><i class="fa-solid fa-minus"></i> Stable</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon kitch"><i class="fa-solid fa-bell"></i></div>
+                            <div class="stat-data">
+                                <span class="stat-lbl">Active Tickets</span>
+                                <h3 class="stat-val" id="stat-active-orders">0</h3>
+                            </div>
+                            <div class="stat-trend" id="stat-tickets-status"><i class="fa-solid fa-fire"></i> In Kitchen</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon resv"><i class="fa-solid fa-calendar-check"></i></div>
+                            <div class="stat-data">
+                                <span class="stat-lbl">Total Tables booked</span>
+                                <h3 class="stat-val" id="stat-reservations">0</h3>
+                            </div>
+                            <div class="stat-trend up"><i class="fa-solid fa-caret-up"></i> Busy Evening</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts and Details Grid -->
+                    <div class="dashboard-details-grid">
+                        <!-- Revenue Performance (Custom SVG drawing or canvas) -->
+                        <div class="detail-card main-chart-card">
+                            <div class="card-header">
+                                <h4>Sales & Dining Performance</h4>
+                                <span class="card-sub">Dynamic Hourly Activity</span>
+                            </div>
+                            <div class="card-body chart-container">
+                                <div class="custom-vector-chart" id="analytics-chart">
+                                    <!-- A premium SVG chart is injected here programmatically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Side widgets -->
+                        <div class="detail-card side-widget-card">
+                            <div class="card-header">
+                                <h4>Popular Gastronomy</h4>
+                                <span class="card-sub">Best Selling Masterpieces</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="popular-items-list" id="popular-items-container">
+                                    <!-- Injected dynamically -->
+                                    <div class="loading-placeholder">Calculating culinary sales...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-card timeline-card">
+                            <div class="card-header">
+                                <h4>Recent Transactions</h4>
+                                <span class="card-sub">Latest closed invoices</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline-list" id="recent-sales-timeline">
+                                    <!-- Injected dynamically -->
+                                    <div class="loading-placeholder">Retrieving server logs...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. POINT OF SALE (POS) VIEW -->
+                <section id="view-pos" class="view-panel">
+                    <div class="pos-layout">
+                        
+                        <!-- POS Left Sidebar: Quick Table Selection -->
+                        <div class="pos-table-column">
+                            <div class="column-header">
+                                <h4>Dining Tables</h4>
+                                <p class="sub">Select a table to take orders</p>
+                            </div>
+                            <div class="pos-tables-grid" id="pos-tables-list">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                        
+                        <!-- POS Center: Menu Catalog with Filters & Search -->
+                        <div class="pos-menu-column">
+                            <div class="menu-header">
+                                <div class="search-box">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="pos-menu-search" placeholder="Search culinary masterpieces...">
+                                </div>
+                                <div class="menu-categories" id="pos-category-filters">
+                                    <button class="category-btn active" data-category="All">All</button>
+                                    <button class="category-btn" data-category="Appetizers">Appetizers</button>
+                                    <button class="category-btn" data-category="Mains">Mains</button>
+                                    <button class="category-btn" data-category="Desserts">Desserts</button>
+                                    <button class="category-btn" data-category="Drinks">Drinks</button>
+                                </div>
+                            </div>
+                            
+                            <div class="pos-menu-grid" id="pos-menu-items">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                        
+                        <!-- POS Right Sidebar: Bill Summary & Cart -->
+                        <div class="pos-cart-column">
+                            <div class="cart-header">
+                                <div class="cart-table-info">
+                                    <span class="lbl">Cart for:</span>
+                                    <h4 class="active-table-name" id="cart-selected-table">Select a Table</h4>
+                                </div>
+                                <button class="btn-clear-cart" id="btn-clear-cart" title="Clear Entire Order"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                            
+                            <!-- Cart Items container -->
+                            <div class="cart-items" id="cart-items-container">
+                                <div class="cart-empty-state">
+                                    <i class="fa-solid fa-receipt"></i>
+                                    <p>Select a table on the left, then click items to add to order</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Billing Details -->
+                            <div class="cart-summary">
+                                <div class="summary-row">
+                                    <span>Subtotal</span>
+                                    <span id="cart-subtotal">₹0.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Service Tax (9%)</span>
+                                    <span id="cart-tax">₹0.00</span>
+                                </div>
+                                <div class="summary-row discount-row">
+                                    <span>Discount (₹)</span>
+                                    <input type="number" id="cart-discount-input" min="0" value="0" step="0.5">
+                                </div>
+                                <hr class="summary-divider">
+                                <div class="summary-row total-row">
+                                    <span>Grand Total</span>
+                                    <span id="cart-total">₹0.00</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Checkout and Kitchen Submission CTA -->
+                            <div class="cart-actions-grid">
+                                <button class="btn btn-secondary" id="btn-send-to-kitchen" disabled>
+                                    <i class="fa-solid fa-fire-burner"></i> Send to Kitchen
+                                </button>
+                                <button class="btn btn-gold" id="btn-checkout-pay" disabled>
+                                    <i class="fa-solid fa-wallet"></i> Pay & Settle Bill
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. TABLE PLANNER VIEW -->
+                <section id="view-tables" class="view-panel">
+                    <div class="tables-view-layout">
+                        <!-- Left Panel: Interactive Visual Grid -->
+                        <div class="tables-grid-panel">
+                            <div class="panel-header">
+                                <div class="filter-group" id="table-section-filters">
+                                    <button class="sec-filter-btn active" data-section="All">All Sections</button>
+                                    <button class="sec-filter-btn" data-section="Main Hall">Main Hall</button>
+                                    <button class="sec-filter-btn" data-section="VIP Lounge">VIP Lounge</button>
+                                    <button class="sec-filter-btn" data-section="Terrace">Terrace</button>
+                                    <button class="sec-filter-btn" data-section="Bar">Bar Lounge</button>
+                                </div>
+                                <div class="table-legend">
+                                    <div class="legend-item"><span class="legend-dot av"></span> Available</div>
+                                    <div class="legend-item"><span class="legend-dot oc"></span> Occupied</div>
+                                    <div class="legend-item"><span class="legend-dot re"></span> Reserved</div>
+                                </div>
+                            </div>
+                            
+                            <div class="restaurant-floor-grid" id="tables-floor-plan">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Side Panel Detail Card & Quick Booking Form -->
+                        <div class="table-action-panel">
+                            <div class="detail-card active" id="table-detail-card">
+                                <div class="card-header">
+                                    <h3 id="table-details-name">Table Operations</h3>
+                                    <span class="badge" id="table-details-status">No Table Selected</span>
+                                </div>
+                                <div class="card-body" id="table-details-body">
+                                    <!-- Fallback message / Injected programmatically -->
+                                    <div class="table-details-placeholder">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                        <p>Click on any table in the floor plan grid to perform guest reservations, seat walk-ins, edit occupancy, or view existing billing statements.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. MENU MANAGER VIEW -->
+                <section id="view-menu" class="view-panel">
+                    <div class="menu-manager-header">
+                        <div class="header-left">
+                            <div class="menu-search-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="menu-mgr-search" placeholder="Search name or description...">
+                            </div>
+                            <select id="menu-mgr-category-filter" class="form-control">
+                                <option value="All">All Categories</option>
+                                <option value="Appetizers">Appetizers</option>
+                                <option value="Mains">Mains</option>
+                                <option value="Desserts">Desserts</option>
+                                <option value="Drinks">Drinks</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-gold" id="btn-add-menu-item">
+                            <i class="fa-solid fa-circle-plus"></i> Add New Creation
+                        </button>
+                    </div>
+
+                    <div class="menu-manager-table-wrapper">
+                        <table class="menu-manager-table">
+                            <thead>
+                                <tr>
+                                    <th>Signature Dish</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Culinary Description</th>
+                                    <th>Tags</th>
+                                    <th>Available</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="menu-manager-rows">
+                                <!-- Injected dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 6. STAFF MANAGER VIEW -->
+                <section id="view-staff" class="view-panel">
+                    <div class="menu-manager-header">
+                        <div class="header-left">
+                            <div class="menu-search-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="staff-search" placeholder="Search staff name or role...">
+                            </div>
+                            <select id="staff-role-filter" class="form-control">
+                                <option value="All">All Roles</option>
+                                <option value="General Manager">General Manager</option>
+                                <option value="Chef">Chef</option>
+                                <option value="Server">Server</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-gold" id="btn-add-staff">
+                            <i class="fa-solid fa-user-plus"></i> Add Staff Member
+                        </button>
+                    </div>
+
+                    <div class="menu-manager-table-wrapper">
+                        <table class="menu-manager-table">
+                            <thead>
+                                <tr>
+                                    <th>Staff Identity</th>
+                                    <th>Role / Title</th>
+                                    <th>Active Shift</th>
+                                    <th>Shift Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-rows">
+                                <!-- Injected dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 5. KITCHEN MONITOR VIEW -->
+                <section id="view-kitchen" class="view-panel">
+                    <div class="kitchen-split-layout" style="display: grid; grid-template-columns: 1fr 280px; gap: 24px; height: 100%;">
+                        
+                        <!-- Left: Kanban board -->
+                        <div class="kitchen-kanban-board" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; height: 100%; overflow: hidden;">
+                            <!-- Kanban Column: Received -->
+                            <div class="kanban-col" id="kcol-received">
+                                <div class="col-head">
+                                    <h3><i class="fa-solid fa-bell"></i> New Tickets</h3>
+                                    <span class="col-count" id="kcount-received">0</span>
+                                </div>
+                                <div class="col-cards" id="kcards-received">
+                                    <!-- Dynamic orders -->
+                                </div>
+                            </div>
+
+                            <!-- Kanban Column: Cooking -->
+                            <div class="kanban-col" id="kcol-preparing">
+                                <div class="col-head">
+                                    <h3><i class="fa-solid fa-utensils"></i> Preparing</h3>
+                                    <span class="col-count" id="kcount-preparing">0</span>
+                                </div>
+                                <div class="col-cards" id="kcards-preparing">
+                                    <!-- Dynamic orders -->
+                                </div>
+                            </div>
+
+                            <!-- Kanban Column: Ready -->
+                            <div class="kanban-col" id="kcol-ready">
+                                <div class="col-head">
+                                    <h3><i class="fa-solid fa-circle-check"></i> Ready to Serve</h3>
+                                    <span class="col-count" id="kcount-ready">0</span>
+                                </div>
+                                <div class="col-cards" id="kcards-ready">
+                                    <!-- Dynamic orders -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Kitchen Stock Inventory Toggle Controls -->
+                        <div class="pos-cart-column" style="padding: 20px; border-radius: 20px;">
+                            <div class="column-header" style="padding: 0 0 16px 0; margin-bottom: 16px;">
+                                <h4>Stock Control</h4>
+                                <p class="sub">Toggle out-of-stock items</p>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto;" id="kitchen-inventory-stock">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+        
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- GLOBAL POPUP MODALS                                      -->
+    <!-- ======================================================== -->
+    
+    <!-- A. MODAL: QUICK RESERVATION / TABLE BOOKING -->
+    <div class="modal-overlay" id="modal-reservation">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="res-modal-title">Premium Table Reservation</h3>
+                <button class="btn-close-modal" id="btn-close-res-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-reservation">
+                    <input type="hidden" id="res-table-id" value="">
+                    
+                    <div class="form-row">
+                        <div class="form-group col-12">
+                            <label for="res-guest-name">Guest Identity</label>
+                            <input type="text" id="res-guest-name" required placeholder="e.g. Baron Rothschild" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="res-phone">Phone number</label>
+                            <input type="text" id="res-phone" placeholder="e.g. +1 (555) 012-3456" class="form-control">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="res-party-size">Party size</label>
+                            <input type="number" id="res-party-size" min="1" max="12" value="2" required class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="res-date">Date</label>
+                            <input type="date" id="res-date" required class="form-control">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="res-time">Preferred Time</label>
+                            <input type="time" id="res-time" value="19:30" required class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-12" id="res-table-select-group">
+                            <label for="res-table-selector">Assign Table</label>
+                            <select id="res-table-selector" class="form-control">
+                                <!-- Injected dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="res-notes">Gastronomic / Special Preferences</label>
+                        <textarea id="res-notes" rows="3" placeholder="Dietary restrictions, seating preferences, occasions..." class="form-control"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="btn-cancel-res-modal">Dismiss</button>
+                        <button type="submit" class="btn btn-gold">Confirm Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- B. MODAL: ADD/EDIT CULINARY CREATION -->
+    <div class="modal-overlay" id="modal-menu-item">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="menu-modal-title">Exquisite Culinary Formulation</h3>
+                <button class="btn-close-modal" id="btn-close-menu-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-menu-item">
+                    <input type="hidden" id="menu-item-id" value="">
+                    
+                    <div class="form-row">
+                        <div class="form-group col-8">
+                            <label for="menu-item-name">Dish Masterpiece Name</label>
+                            <input type="text" id="menu-item-name" required placeholder="e.g. Pan-Seared Wagyu Ribeye" class="form-control">
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="menu-item-price">Gold Price (₹)</label>
+                            <input type="number" id="menu-item-price" min="0.01" step="0.01" required placeholder="0.00" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="menu-item-category">Category</label>
+                            <select id="menu-item-category" class="form-control">
+                                <option value="Appetizers">Appetizers</option>
+                                <option value="Mains">Mains</option>
+                                <option value="Desserts">Desserts</option>
+                                <option value="Drinks">Drinks</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="menu-item-tags">Style Tags (Comma-Separated)</label>
+                            <input type="text" id="menu-item-tags" placeholder="Signature, Vegan, Hot" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="menu-item-desc">Aesthetic Recipe/Menu Description</label>
+                        <textarea id="menu-item-desc" rows="3" required placeholder="Outline ingredients, notes, and preparation accents..." class="form-control"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="toggle-switch-container">
+                            <input type="checkbox" id="menu-item-available" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Active & available in POS Menu catalog</span>
+                        </label>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="btn-cancel-menu-modal">Dismiss</button>
+                        <button type="submit" class="btn btn-gold" id="btn-save-menu-item">Integrate Dish</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- C. MODAL: RECEIPT BILL STATEMENT (INVOICING) -->
+    <div class="modal-overlay" id="modal-receipt">
+        <div class="modal-card receipt-modal-card">
+            <div class="modal-header no-border">
+                <button class="btn-close-modal" id="btn-close-receipt-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="receipt-paper" id="receipt-paper-content">
+                    <!-- Dynamic invoice populated in JS -->
+                </div>
+            </div>
+            <div class="modal-footer receipt-footer">
+                <button class="btn btn-secondary btn-sm" id="btn-print-receipt"><i class="fa-solid fa-print"></i> Print Invoice</button>
+                <button class="btn btn-gold btn-sm" id="btn-settle-receipt-pay"><i class="fa-solid fa-credit-card"></i> Pay & Settle Table</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- D. MODAL: ADD/EDIT STAFF PROFILE -->
+    <div class="modal-overlay" id="modal-staff">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="staff-modal-title">Staff Profile Formulation</h3>
+                <button class="btn-close-modal" id="btn-close-staff-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-staff">
+                    <input type="hidden" id="staff-member-id" value="">
+                    
+                    <div class="form-group">
+                        <label for="staff-name">Staff Name</label>
+                        <input type="text" id="staff-name" required placeholder="e.g. Rajesh Patel" class="form-control">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="staff-role">Role / Position</label>
+                            <select id="staff-role" class="form-control">
+                                <option value="General Manager">General Manager</option>
+                                <option value="Chef">Chef</option>
+                                <option value="Server">Server</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="staff-shift">Shift Timings</label>
+                            <select id="staff-shift" class="form-control">
+                                <option value="Day (09:00 - 18:00)">Day (09:00 - 18:00)</option>
+                                <option value="Evening (16:00 - 23:00)">Evening (16:00 - 23:00)</option>
+                                <option value="Night (22:00 - 06:00)">Night (22:00 - 06:00)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="staff-status">Duty Status</label>
+                        <select id="staff-status" class="form-control">
+                            <option value="Active">Active Duty</option>
+                            <option value="On Break">On Break</option>
+                            <option value="Off Duty">Off Duty</option>
+                        </select>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="btn-cancel-staff-modal">Dismiss</button>
+                        <button type="submit" class="btn btn-gold" id="btn-save-staff-item">Register Staff</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role-Based Secure Login Screen -->
+    <div class="login-screen-wrapper" id="login-screen">
+        <div class="login-bg-glow"></div>
+        <div class="login-bg-glow top-right"></div>
+        <div class="login-bg-glow bottom-left"></div>
+        
+        <div class="login-card">
+            <div class="login-brand-logo">
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <h1 class="login-title">Shahi Darbar</h1>
+            <p class="login-subtitle">Staff Portal</p>
+            
+            <form id="login-form">
+                <div class="login-form-group">
+                    <label class="login-form-label" for="login-staff-select">Select Staff Profile</label>
+                    <div class="login-select-wrapper">
+                        <select class="login-select" id="login-staff-select" required>
+                            <option value="" disabled selected>Choose your profile...</option>
+                            <!-- Dynamically loaded -->
+                        </select>
+                        <i class="fa-solid fa-chevron-down login-select-arrow"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn" id="btn-login">
+                    Access Portal <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+                
+                <div class="login-error-msg" id="login-error">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Invalid authentication, please try again.</span>
+                </div>
+            </form>
+            
+            <p class="login-footer-info">
+                Shahi Darbar Restaurant Group &copy; 2026. All rights reserved.
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript driver -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
